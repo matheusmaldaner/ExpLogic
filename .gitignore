@@ -1,0 +1,12 @@
+# Ignore Python virtual environments
+explogic_env/
+
+# Ignore datasets
+data-mnist/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
