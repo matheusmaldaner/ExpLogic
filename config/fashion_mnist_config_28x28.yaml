@@ -1,0 +1,21 @@
+models:
+  model_001:
+    input_dim: 784
+    layers_config:
+      LogicLayer001:
+        connections: random
+        device: cuda
+        grad_factor: 2
+        implementation: cuda
+        in_dim: 784
+        out_dim: 5000
+      LogicLayer002:
+        connections: random
+        device: cuda
+        grad_factor: 2
+        implementation: cuda
+        in_dim: 5000
+        out_dim: 5000
+    learning_rate: 0.001
+    output_size: 10
+    tau: 10

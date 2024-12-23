@@ -161,9 +161,9 @@ class LogicGraph:
                 learned_gate = ALL_OPERATIONS[gate_op_idx]                
                 
                 # Add gates if they're not included
-                self.g.add_node(naid, layer=i, counts=0, gate="input",sf=0) if naid not in self.g.nodes else None
-                self.g.add_node(nbid, layer=i, counts=0, gate="input",sf=0) if nbid not in self.g.nodes else None
-                self.g.add_node(ngid, layer=i+1, counts=0, gate=learned_gate,sf=0) if ngid not in self.g.nodes else None
+                self.g.add_node(naid, layer=i,   counts=0, gate="input",      sf=0, sp=0) if naid not in self.g.nodes else None
+                self.g.add_node(nbid, layer=i,   counts=0, gate="input",      sf=0, sp=0) if nbid not in self.g.nodes else None
+                self.g.add_node(ngid, layer=i+1, counts=0, gate=learned_gate, sf=0, sp=0) if ngid not in self.g.nodes else None
                 
                 # Add edges if they're not connected
                 if learned_gate in self.a_gates: 
@@ -183,7 +183,7 @@ class LogicGraph:
                     self.count_dict[noid] = 0
 
                     # Add output node 
-                    self.g.add_node(noid, layer=self.nlayers+1, counts=0, gate="output",sf=0)  if noid not in self.g.nodes else None
+                    self.g.add_node(noid, layer=self.nlayers+1, counts=0, gate="output",sf=0, sp=0)  if noid not in self.g.nodes else None
 
                     # Add gate to output 
                     self.g.add_edge(ngid, noid,ab=None)
@@ -215,7 +215,7 @@ class LogicGraph:
             if isinstance(dataset,torch.utils.data.dataloader.DataLoader): 
                 for batch_inputs, _ in tqdm(dataset, desc="Processing MNIST images"):
                     batch_inputs = batch_inputs.to('cuda')
-                    self.net(batch_inputs)  # Forward pass
+                    self.net(batch_inputs.float())  # Forward pass
                     total_images += batch_inputs.size(0)
             if isinstance(dataset,torch.Tensor): 
                 batch_inputs = dataset.to('cuda')
