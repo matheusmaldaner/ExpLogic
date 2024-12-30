@@ -16,6 +16,6 @@ models:
         implementation: cuda
         in_dim: 5000
         out_dim: 5000
-    learning_rate: 0.001
+    learning_rate: 0.01
     output_size: 10
     tau: 10

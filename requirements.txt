@@ -21,8 +21,10 @@ kiwisolver==1.4.7
 matplotlib==3.9.4
 matplotlib-inline==0.1.7
 nest-asyncio==1.6.0
+networkx==3.2.1
 numpy==1.26.4
 omegaconf==2.3.0
+opencv-python==4.10.0.84
 packaging==24.2
 pandas==2.2.3
 parso==0.8.4
