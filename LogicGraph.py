@@ -204,12 +204,10 @@ class LogicGraph:
     def compute_sf(self, dataset): 
         
         # Add tracking functions
-        #print("adding hooks")
         self.remove_hooks()
         self.add_hooks()
 
         # Pass all samples thorugh network with hook functions added to track properties
-        #print("Processing")
         total_images = 0 
         with torch.no_grad():  # Disable gradient computation
             if isinstance(dataset,torch.utils.data.dataloader.DataLoader): 
@@ -221,9 +219,7 @@ class LogicGraph:
                 batch_inputs = dataset.to('cuda')
                 self.net(batch_inputs)  # Forward pass
                 total_images += batch_inputs.size(0)
-        
-        # Need a way to garuntee that all layer have some properties associated with them (initialize) 
-        
+                
         # Compute and set the switching frequency property 
         sf = {}
         for name in self.count_dict.keys(): 
