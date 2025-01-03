@@ -1,6 +1,7 @@
 import mnist_dataset
 from torch.utils.data import DataLoader, Dataset, Subset, TensorDataset
 import torchvision.transforms as transforms
+from collections import defaultdict
 from tqdm import tqdm
 import torch
 import numpy as np
@@ -13,10 +14,15 @@ def binarize_images(images, threshold=0.5):
 # Function to create class-specific data loaders
 def create_class_dataloaders(dataset, batch_size, num_classes=10, binarize=False, threshold=0.5):
     class_loaders = {}
+    class_indices = defaultdict(list)
+
+    # Step 1: Precompute indices for each class
+    for i, (_, label) in enumerate(dataset):
+        class_indices[label].append(i)
     
+    # Step 2: Create DataLoaders for each class
     for class_idx in range(num_classes):
-        # Get indices of samples belonging to the current class
-        indices = [i for i, (_, label) in enumerate(dataset) if label == class_idx]
+        indices = class_indices[class_idx]
         
         # Create a Subset of the dataset with only the current class
         class_subset = Subset(dataset, indices)
@@ -26,7 +32,6 @@ def create_class_dataloaders(dataset, batch_size, num_classes=10, binarize=False
         
         # Create a DataLoader for this class
         class_loader = DataLoader(class_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, drop_last=True)
-        
         class_loaders[class_idx] = class_loader
     
     return class_loaders

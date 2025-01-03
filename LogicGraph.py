@@ -213,7 +213,7 @@ class LogicGraph:
         total_images = 0 
         with torch.no_grad():  # Disable gradient computation
             if isinstance(dataset,torch.utils.data.dataloader.DataLoader): 
-                for batch_inputs, _ in tqdm(dataset, desc="Processing MNIST images"):
+                for batch_inputs, _ in tqdm(dataset, desc="Processing images"):
                     batch_inputs = batch_inputs.to('cuda')
                     self.net(batch_inputs.float())  # Forward pass
                     total_images += batch_inputs.size(0)
