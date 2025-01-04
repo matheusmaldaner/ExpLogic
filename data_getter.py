@@ -23,9 +23,7 @@ def get_dataset(dataset_name, batch_size=64, data_dir='./data', bpp=8, crop=None
                                    transforms.ToTensor(),  # Convert images to tensor
                                    #transforms.Normalize((0.5,), (0.5,)), 
                                    transforms.Lambda(lambda x: (x * max_num + 0.5).to(torch.uint8)),  # Scale to [0, max_num] and convert to uint8
-                                   transforms.Lambda(lambda x: torch.tensor([[int(i) for i in f'{int(pixel.item()):0{bpp}b}'] for pixel in x.flatten()]).flatten())
-  # Convert integer into binary tensor
-                                   ]) 
+                                   transforms.Lambda(lambda x: torch.tensor([[int(i) for i in f'{int(pixel.item()):0{bpp}b}'] for pixel in x.flatten()]).flatten())]) 
 
     if dataset_name.lower() == 'mnist':
         train_dataset = datasets.MNIST(root=data_dir, train=True, download=True, transform=transform)
