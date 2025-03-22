@@ -44,8 +44,17 @@ pip install -r requirements.txt
 
 If you use eXpLogic in your research, please cite the corresponding paper:
 
-_Wormald, S., Koblah, D., Maldaner, M. K., Forte, D., & Woodard, D. L. (2024). eXpLogic: Explaining Logic Types and Patterns in DiffLogic Networks. Springer Journal._
-
+```
+@misc{wormald2025explogicexplaininglogictypes,
+      title={eXpLogic: Explaining Logic Types and Patterns in DiffLogic Networks}, 
+      author={Stephen Wormald and David Koblah and Matheus Kunzler Maldaner and Domenic Forte and Damon L. Woodard},
+      year={2025},
+      eprint={2503.09910},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2503.09910}, 
+}
+```
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request for review.
