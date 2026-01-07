@@ -7,6 +7,9 @@ import torch
 import numpy as np
 import random
 
+# Device configuration - automatically use CUDA if available, otherwise CPU
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 # Function to binarize images
 def binarize_images(images, threshold=0.5):
     return (images > threshold).float()
@@ -31,7 +34,9 @@ def create_class_dataloaders(dataset, batch_size, num_classes=10, binarize=False
         class_dataset = BinarizedDataset(class_subset, binarize, threshold) if binarize else class_subset
         
         # Create a DataLoader for this class
-        class_loader = DataLoader(class_dataset, batch_size=batch_size, shuffle=True, pin_memory=True, drop_last=True)
+        # pin_memory only useful when using CUDA
+        class_loader = DataLoader(class_dataset, batch_size=batch_size, shuffle=True,
+                                  pin_memory=torch.cuda.is_available(), drop_last=True)
         class_loaders[class_idx] = class_loader
     
     return class_loaders
@@ -52,7 +57,20 @@ class BinarizedDataset(Dataset):
             image = binarize_images(image, self.threshold)
         return image, label
 
-def predict_and_categorize(model, data_loader, binarize=False, threshold=0.5):
+def predict_and_categorize(model, data_loader, binarize=False, threshold=0.5, device=None):
+    """
+    Predict and categorize model outputs.
+
+    Args:
+        model: The model to use for prediction
+        data_loader: DataLoader for the dataset
+        binarize: Whether to binarize inputs
+        threshold: Threshold for binarization
+        device: Device to use (defaults to CUDA if available, else CPU)
+    """
+    if device is None:
+        device = DEVICE
+
     all_images = []
     all_labels = []
     all_predictions = []
@@ -62,7 +80,7 @@ def predict_and_categorize(model, data_loader, binarize=False, threshold=0.5):
 
     with torch.no_grad():  # Disable gradient calculation for inference
         for batch_inputs, batch_outputs in tqdm(data_loader, desc="Predicting"):
-            batch_inputs, batch_outputs = batch_inputs.to('cuda'), batch_outputs.to('cuda')
+            batch_inputs, batch_outputs = batch_inputs.to(device), batch_outputs.to(device)
 
             if binarize:
                 batch_inputs = (batch_inputs > threshold).float()

@@ -1,16 +1,19 @@
-# Base import 
-import torch 
+# Base import
+import torch
 from torch.utils.data import DataLoader, Dataset, Subset, TensorDataset
-import numpy as np 
-from tqdm import tqdm 
+import numpy as np
+from tqdm import tqdm
 import random
-import matplotlib.pyplot as plt 
-import networkx as nx 
+import matplotlib.pyplot as plt
+import networkx as nx
 import pandas as pd
-import copy 
+import copy
 
 # Dataset imports
 from utils import mnist_dataset
+
+# Device configuration - automatically use CUDA if available, otherwise CPU
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ALL_OPERATIONS = [
     "zero", "and", "not_implies", "a", "not_implied_by", "b", "xor", "or", 
@@ -202,24 +205,31 @@ class LogicGraph:
     #    return xlist 
     
     # Add tracking functions
-    def compute_sf(self, dataset): 
-        
+    def compute_sf(self, dataset, device=None):
+        """
+        Compute switching frequency for the network.
+
+        Args:
+            dataset: DataLoader or Tensor to process
+            device: Device to use (defaults to CUDA if available, else CPU)
+        """
+        if device is None:
+            device = DEVICE
+
         # Add tracking functions
-        #print("adding hooks")
         self.remove_hooks()
         self.add_hooks()
 
-        # Pass all samples thorugh network with hook functions added to track properties
-        #print("Processing")
-        total_images = 0 
+        # Pass all samples through network with hook functions added to track properties
+        total_images = 0
         with torch.no_grad():  # Disable gradient computation
-            if isinstance(dataset,torch.utils.data.dataloader.DataLoader): 
+            if isinstance(dataset, torch.utils.data.dataloader.DataLoader):
                 for batch_inputs, _ in tqdm(dataset, desc="Processing images"):
-                    batch_inputs = batch_inputs.to('cuda')
+                    batch_inputs = batch_inputs.to(device)
                     self.net(batch_inputs.float())  # Forward pass
                     total_images += batch_inputs.size(0)
-            if isinstance(dataset,torch.Tensor): 
-                batch_inputs = dataset.to('cuda')
+            if isinstance(dataset, torch.Tensor):
+                batch_inputs = dataset.to(device)
                 self.net(batch_inputs)  # Forward pass
                 total_images += batch_inputs.size(0)
         
@@ -399,18 +409,18 @@ class LogicGraph:
                     wire_type = props["ab"] if "ab" in props.keys() else None
 
                     # Check whether the current wire increases the class score by being zero
-                    if (wire_type == "a" and parent_type in a_not_list) or (wire_type == "b" and parent_type in b_not_list): 
+                    if (wire_type == "a" and parent_type in a_not_list) or (wire_type == "b" and parent_type in b_not_list):
 
                         # Adjust the "desired child output"
-                        child_sign = -1*parent_sign
+                        child_sign = -1*desired_parent_output
                         new_fan_in.append(  (child_node, child_sign))
                         input_set.append( (child_node, child_sign))
 
                     # Case where the current wire increases the class score by being a one
-                    else: 
+                    else:
 
                         # Adjust the "desired child output"
-                        child_sign = parent_sign
+                        child_sign = desired_parent_output
                         new_fan_in.append(  (child_node, child_sign))
                         input_set.append( (child_node, child_sign))
 
@@ -441,13 +451,13 @@ class LogicGraph:
         """
         Visualize the fan-in of the given output node as highlighted pixels in an image.
         """
-        fan_in,pixels = find_fan_in(self.g, output_node,threshold,metric)
+        fan_in, input_set, connections = self.find_fan_in(output_node, threshold, metric)
         # Create a blank 28x28 image
         img = np.zeros((20, 20))
 
         # Highlight pixels corresponding to input nodes in the fan-in
-        for node,sign in fan_in:
-            pixel = node_to_pixel(node)
+        for node, sign in fan_in:
+            pixel = self.node_to_pixel(node)
             if pixel:
                 x, y = pixel
                 if signed: 
@@ -455,7 +465,7 @@ class LogicGraph:
                 else: 
                     img[y, x] += 1  # Set pixel to white (1)
 
-        if show: 
+        if show:
             # Plot the image
             plt.imshow(img)
             plt.title(f"Fan-in visualization for {output_node}")
@@ -463,4 +473,4 @@ class LogicGraph:
             plt.axis('off')
             plt.show()
 
-        return img, fan_in,pixels    
+        return img, fan_in, input_set    
